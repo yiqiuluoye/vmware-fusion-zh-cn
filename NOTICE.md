@@ -5,6 +5,8 @@
 - 中文本地化：**yiqiuluoye**
 - 适用版本：VMware Fusion Pro 26H1（26.0.0，build 25388279），macOS 27.x
 - 制作方式：本地资源级本地化，不修改任何可执行代码、不替换界面 xib/nib 结构
+- 许可证：GNU GPL v3.0（见 LICENSE；中文对照见 LICENSE.zh-CN.md）
+- 版权：Copyright (C) 2026 yiqiuluoye
 
 ## 声明
 
