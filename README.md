@@ -26,6 +26,26 @@ VMware Fusion 官方只提供 English / French / Japanese / Spanish 四种语言
 `foundryErrMsgId` 内部错误码、三枚 JIS 键盘键（`変換 / 無変換 / ひらがな`，硬编码在二进制
 按键表里，不在任何消息目录，要改需破坏代码签名，得不偿失）。
 
+
+## 使用前
+
+```bash
+python3 fzp.py doctor     # 环境体检：版本、架构、写入权限一次看清
+```
+
+安装前做三项检查，不通过会直接中止（不改任何文件）：
+
+| 检查 | 不通过时 |
+|---|---|
+| 版本为 26H1（26.0.0 / build 25388279） | 提示词条可能错位，需 `--force` 才继续 |
+| 主机架构与 app 切片匹配 | Apple Silicon 主机 + 无 arm64 切片 → 拒绝 |
+| 能写入 `/Applications`（macOS 14+ 的「App 管理」权限）| 给出授权路径与重开终端的提示 |
+
+**首次使用请先授权**：系统设置 → 隐私与安全性 → **App 管理** → 勾选你运行命令的终端
+（Terminal / iTerm2 / VS Code / Codex）。授权后必须**完全退出该终端再重新打开**，
+权限只在进程启动时读取。若列表里没有该项，先执行一次 `sudo python3 fzp.py install`
+触发系统提示。
+
 ## 安装
 
 ```bash

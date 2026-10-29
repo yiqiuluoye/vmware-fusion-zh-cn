@@ -36,6 +36,10 @@ VERSION = "1.0.0"
 DEFAULT_APP = "/Applications/VMware Fusion.app"
 SIG_FILE = os.path.join(HERE, "signature.txt")
 MANIFEST_NAME = ".fzp-manifest.json"
+# 已验证的宿主产品版本；其他版本会要求 --force
+SUPPORTED = {"26.0.0": {"name": "26H1", "builds": {"25388279"}}}
+TESTED_ARCH = "arm64"          # 本项目在 Apple Silicon 上验证
+TESTED_MACOS = (27, "27.x")    # 在 macOS 27.2 上验证
 MSG_KEY_ABOUT = "msg.mac.aboutBox.trademarkGeneral"
 OUR_MARKERS = ("fusion-zh-patch", "中文本地化", "中文参考译本")
 REL_LPROJ = os.path.join("Contents", "Resources", "zh-Hans.lproj")
@@ -125,6 +129,113 @@ def quit_fusion() -> bool:
         time.sleep(0.5)
     say("    Fusion 仍在运行；请先关闭虚拟机并手动退出")
     return False
+
+
+# ────────────────────────────── 预检 ──────────────────────────────
+def app_info(tgt: App) -> dict:
+    info = {}
+    plist = os.path.join(tgt.path, "Contents", "Info.plist")
+    try:
+        import plistlib
+        d = plistlib.load(open(plist, "rb"))
+        info["version"] = d.get("CFBundleShortVersionString", "?")
+        info["build"] = d.get("CFBundleVersion", "?")
+        info["min_os"] = d.get("LSMinimumSystemVersion", "?")
+    except (OSError, ValueError):
+        info["version"] = info["build"] = info["min_os"] = "?"
+    macho = os.path.join(tgt.path, "Contents", "MacOS", "VMware Fusion")
+    r = run(["lipo", "-archs", macho])
+    info["archs"] = r.stdout.strip().split() if r.returncode == 0 else []
+    return info
+
+
+def host_info() -> dict:
+    r = run(["sw_vers", "-productVersion"])
+    return {"arch": run(["uname", "-m"]).stdout.strip(), "os": r.stdout.strip()}
+
+
+def writable(tgt: App) -> tuple[bool, str]:
+    """检测能否写入 app（macOS 14+ 受「App 管理」隐私权限控制）。"""
+    probe = os.path.join(tgt.lproj, ".fzp-write-test")
+    try:
+        with open(probe, "w") as f:
+            f.write("x")
+        os.remove(probe)
+        return True, ""
+    except PermissionError as e:
+        return False, getattr(e, "strerror", "Operation not permitted")
+    except OSError as e:
+        return False, str(e)
+
+
+def preflight(tgt: App, force: bool = False, advisory: bool = False) -> bool:
+    """返回是否允许继续安装。"""
+    if not tgt.exists():
+        say("✗ 找不到 VMware Fusion：%s" % tgt.path)
+        return False
+    info, host = app_info(tgt), host_info()
+    ver = info["version"]
+    supported = SUPPORTED.get(ver)
+    ok = True
+
+    say("── 预检 ──────────────────────────────────────")
+    say("  VMware Fusion ：%s（build %s）" % (ver, info["build"]))
+    say("  可执行架构     ：%s" % ("、".join(info["archs"]) or "未知"))
+    say("  主机           ：%s / macOS %s" % (host["arch"], host["os"]))
+    say("  本补丁适配     ：26H1（26.0.0，build 25388279），验证于 %s / macOS %s"
+        % (TESTED_ARCH, TESTED_MACOS[1]))
+
+    if not supported:
+        say("  ⚠ 版本不匹配：本补丁为 26H1 制作，当前为 %s。" % ver)
+        say("    词条 key 可能对不上，界面可能出现空白或错位。确认要继续请加 --force。")
+        ok = False
+    elif info["build"] not in supported["builds"]:
+        say("  ⚠ build 号不同（%s）：同版本号的二次打包，通常可用，但未验证。" % info["build"])
+        if not force:
+            ok = False
+
+    if host["arch"] != TESTED_ARCH:
+        say("  ⚠ 当前是 %s 主机，本项目只在 %s（Apple Silicon）上验证过；"
+            "Intel Mac 的 Fusion 结构相同，但请先备份并自行确认。" % (host["arch"], TESTED_ARCH))
+    if "arm64" not in info["archs"] and host["arch"] == "arm64":
+        say("  ✗ 该 Fusion 没有 arm64 切片，与 Apple Silicon 主机不匹配。")
+        ok = False
+
+    major = 0
+    try:
+        major = int(host["os"].split(".")[0])
+    except ValueError:
+        pass
+    if major and major != TESTED_MACOS[0]:
+        say("  ⚠ 当前 macOS %s 与验证环境（%s）不同，如遇异常请先卸载再反馈。" % (host["os"], TESTED_MACOS[1]))
+
+    is_root = os.geteuid() == 0
+    if not is_root:
+        say("  %s 未以管理员身份运行；正式安装请用 sudo。"
+            % ("·" if advisory else "✗"))
+        if not advisory:
+            ok = False
+    else:
+        good, err = writable(tgt)
+        if not good:
+            say("  ✗ 无法写入 app（%s）——多半是「App 管理」隐私权限未授权。" % err)
+            say("    处理：系统设置 → 隐私与安全性 → App 管理 → 勾选你正在用的终端，")
+            say("          然后完全退出该终端再重新打开（权限只在启动时读取）。")
+            ok = False
+        else:
+            say("  写入权限       ：正常")
+    say("──────────────────────────────────────────────")
+    return ok
+
+
+USAGE_HINT = """使用步骤：
+  1) 首次使用先授权：系统设置 → 隐私与安全性 → App 管理 → 勾选你的终端
+     （若列表里没有，先执行一次安装触发提示；或用「完全磁盘访问权限」代替）
+  2) 保存虚拟机里的资料，退出 VMware Fusion
+  3) cd 到本目录，执行 sudo python3 fzp.py install
+  4) 重新打开 VMware Fusion 验证：关于窗口、设置面板、菜单
+  回滚：sudo python3 fzp.py uninstall
+"""
 
 
 # ────────────────────────────── 清单 ──────────────────────────────
@@ -411,6 +522,11 @@ def cmd_install(argv: list[str]) -> int:
     else:
         say("检测到：尚未安装（或安装记录缺失，将作为全新安装处理）")
 
+    if not preflight(tgt, force, advisory=dry):
+        say("\n预检未通过，已中止（未改动任何文件）。用法与授权说明：python3 fzp.py doctor")
+        return 1
+    if dry:
+        say("（--dry-run：只报告，不写文件）")
     if not no_quit and not dry and not quit_fusion():
         return 1
 
@@ -421,8 +537,6 @@ def cmd_install(argv: list[str]) -> int:
         bak = tempfile.mkdtemp(prefix="fzp-backup-")
     os.makedirs(bak, exist_ok=True)
     say("==> 备份目录：%s" % bak)
-    if dry:
-        say("（--dry-run：只报告，不写文件）")
 
     files = deploy(tgt, bak, dry, has_manifest=bool(cur))
     if files.get("notes"):
@@ -589,6 +703,19 @@ def cmd_package() -> int:
     return 0
 
 
+def cmd_doctor() -> int:
+    tgt = App(DEFAULT_APP)
+    say("VMware Fusion 简体中文补丁 · 环境体检")
+    say("")
+    preflight(tgt, force=True, advisory=True)
+    say("")
+    if os.geteuid() != 0:
+        say("提示：当前以普通用户运行，「写入权限」一项未检测；安装时请用 sudo。")
+        say("")
+    say(USAGE_HINT)
+    return 0
+
+
 def cmd_prune(argv: list[str]) -> int:
     """清理历史备份：保留最早一个（含最原始的版本）与最近 N 个。"""
     o, _f, _p = parse_args(argv, ("--keep",))
@@ -629,6 +756,7 @@ def main(argv: list[str]) -> int:
         "verify": lambda _a: 0 if verify() else 1,
         "package": lambda _a: cmd_package(),
         "prune": cmd_prune,
+        "doctor": lambda _a: cmd_doctor(),
     }.get(cmd, lambda _a: (say("未知命令：%s\n" % cmd), print(__doc__), 1)[-1])(rest)
 
 
