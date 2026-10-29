@@ -188,7 +188,8 @@ def preflight(tgt: App, force: bool = False, advisory: bool = False) -> bool:
     if not supported:
         say("  ⚠ 版本不匹配：本补丁为 26H1 制作，当前为 %s。" % ver)
         say("    词条 key 可能对不上，界面可能出现空白或错位。确认要继续请加 --force。")
-        ok = False
+        if not force:
+            ok = False
     elif info["build"] not in supported["builds"]:
         say("  ⚠ build 号不同（%s）：同版本号的二次打包，通常可用，但未验证。" % info["build"])
         if not force:
