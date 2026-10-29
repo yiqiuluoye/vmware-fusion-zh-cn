@@ -630,7 +630,8 @@ def cmd_uninstall(argv: list[str]) -> int:
     if bak and not os.path.isdir(bak):
         bak = ""
 
-    if not quit_fusion():
+    # 只有回滚真实安装时才退出 Fusion；--target 指向副本时不要动用户正在运行的应用
+    if tgt.is_default and not quit_fusion():
         return 1
     say("==> 回滚（备份：%s）" % (bak or "无，仅按清单删除新增文件"))
 
