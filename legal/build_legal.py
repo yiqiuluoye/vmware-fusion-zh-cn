@@ -51,7 +51,29 @@ def build_credits():
         t.replace("<!--SIGNATURE-->", body))
     print("    Credits.html（含署名）")
 
+def build_ack():
+    """「致谢」按钮打开的是 Resources/Acknowledgments.txt（根目录，非本地化）。
+
+    两边都写：根目录改成中英对照（兜底），同时在 zh-Hans.lproj 放一份
+    （若代码走 bundle 本地化查找，则会优先命中）。
+    """
+    zh = "本产品包含开源软件。适用的许可证与版权信息，请参阅 Broadcom 客户支持门户。"
+    en = ("This product incorporates open source software. For applicable license and\n"
+          "copyright information, please refer to the Broadcom customer support portal.")
+    sig = ""
+    if SIG and os.path.exists(SIG):
+        sig = "\n\n" + "\n".join(l for l in open(SIG, encoding="utf-8").read().strip().splitlines() if l.strip())
+    text = zh + "\n\n" + en + sig + "\n"
+    for path in (os.path.join(APP_RES, "Acknowledgments.txt"), os.path.join(OUT, "Acknowledgments.txt")):
+        try:
+            open(path, "w", encoding="utf-8").write(text)
+        except PermissionError:
+            print("    跳过 %s（权限不足）" % path)
+    print("    Acknowledgments.txt（中英对照，已写入资源根目录与 zh-Hans）")
+
+
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     build_eula()
     build_credits()
+    build_ack()

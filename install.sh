@@ -96,6 +96,8 @@ echo "==> v4：生成中英对照的法律文本（EULA / 商标声明）"
 for f in EULA.rtf Credits.html; do
   [ -f "$LPRJ/$f" ] && cp -p "$LPRJ/$f" "$BAK/$f"
 done
+[ -f "$TARGET/Contents/Resources/Acknowledgments.txt" ] && \
+  cp -p "$TARGET/Contents/Resources/Acknowledgments.txt" "$BAK/Acknowledgments.txt.orig"
 python3 "$HERE/legal/build_legal.py" "$TARGET/Contents/Resources" "$LPRJ" "$HERE/signature.txt" || \
   echo "    （法律文本生成失败，跳过；不影响其余汉化）"
 

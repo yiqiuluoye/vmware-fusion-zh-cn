@@ -57,6 +57,10 @@ done
 for f in EULA.rtf Credits.html; do
   if [ -f "$HERE/backup/$BATCH/$f" ]; then cp -p "$HERE/backup/$BATCH/$f" "$LPRJ/$f"; else rm -f "$LPRJ/$f"; fi
 done
+if [ -f "$HERE/backup/$BATCH/Acknowledgments.txt.orig" ]; then
+  cp -p "$HERE/backup/$BATCH/Acknowledgments.txt.orig" "$TARGET/Contents/Resources/Acknowledgments.txt"
+fi
+rm -f "$LPRJ/Acknowledgments.txt"
 rm -rf "$TARGET/Contents/Library/messages/zh-Hans"
 echo "    已移除 messages/zh-Hans"
 
