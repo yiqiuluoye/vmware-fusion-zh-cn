@@ -37,7 +37,7 @@ import time
 import zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-VERSION = "1.1.0"
+VERSION = "1.1.1"
 DEFAULT_APP = "/Applications/VMware Fusion.app"
 SIG_FILE = os.path.join(HERE, "signature.txt")
 MANIFEST_NAME = ".fzp-manifest.json"
@@ -812,6 +812,16 @@ def cmd_prune(argv: list[str]) -> int:
     left = sorted(os.listdir(root))
     say("当前保留 %d 个：%s" % (len(left), ", ".join(left)))
     return 0
+
+
+def elevate(argv: list[str]) -> int | None:
+    """非 root 且有终端时，用 sudo 重新执行自己；返回 None 表示继续当前进程。"""
+    if os.geteuid() == 0 or "--no-elevate" in argv or not sys.stdin.isatty():
+        return None
+    exe = sys.executable or "python3"
+    say("需要管理员权限修改 /Applications，正在申请（会让你输入登录密码）…")
+    os.execvp("sudo", ["sudo", exe, os.path.abspath(__file__)] + [a for a in argv if a != "--no-elevate"])
+    return 1
 
 
 def main(argv: list[str]) -> int:
