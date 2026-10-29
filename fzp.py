@@ -388,7 +388,7 @@ def deploy(tgt: App, bak: str, dry: bool = False, has_manifest: bool = False) ->
                    if re.match(r'^"[^"]+"\s*=', l) and re.findall(r'^"([^"]+)"', l)[0] not in have]
             if add:   # 无新增就不要写盘，保证重复安装字节级幂等
                 open(dst, "w", encoding="utf-8").write(cur + "\n\n" + "\n".join(add) + "\n")
-            say("    %-44s +%d 条" % (name.replace(".strings", ""), len(add)))
+            say("    %-44s %s" % (name.replace(".strings", ""), ("+%d 条" % len(add)) if add else "无新增（已是最新）"))
 
         put(rel, merge)
 
@@ -409,7 +409,7 @@ def deploy(tgt: App, bak: str, dry: bool = False, has_manifest: bool = False) ->
                    if re.match(r'^"[^"]+"\s*=', l) and re.findall(r'^"([^"]+)"', l)[0] not in have]
             if add:
                 open(dst, "w", encoding="utf-8").write(cur.rstrip("\n") + "\n\n" + "\n".join(add) + "\n")
-            say("    duiSettingsViewBrowser +%d 条" % len(add))
+            say("    duiSettingsViewBrowser %s" % (("+%d 条" % len(add)) if add else "无新增（已是最新）"))
 
         put(os.path.join(REL_LPROJ, "duiSettingsViewBrowser.strings"), merge_browser)
     nib = os.path.join(HERE, "v2", "duiSettingsViewBrowser.nib")
@@ -433,7 +433,7 @@ def deploy(tgt: App, bak: str, dry: bool = False, has_manifest: bool = False) ->
         os.makedirs(tgt.msgdir, exist_ok=True)
         shutil.copy2(src_vmsg, tgt.vmsg)
         inject_signature(tgt.vmsg)
-    n = open(src_vmsg, encoding="utf-8").read().count(" = ")
+    n = count_entries(src_vmsg)
     say("    %d 条" % n)
     files.append({"path": os.path.join(REL_MSGDIR, "vmware.vmsg"),
                   "action": "added", "sha256": sha256(tgt.vmsg) if not dry else ""})
@@ -456,6 +456,18 @@ def deploy(tgt: App, bak: str, dry: bool = False, has_manifest: bool = False) ->
         say("    Acknowledgments.txt（中英对照）")
 
     return {"files": files, "vmsg_entries": n, "notes": notes}
+
+
+def count_entries(path: str) -> int:
+    """按行统计消息条目数。
+
+    不能用 text.count(" = ")：有些文案的值内部本身含 " = "（例如
+    `msg.guestOperations.data` 的 “vix 数据 = （%s）”），会被多计。
+    """
+    try:
+        return len(re.findall(r'^[A-Za-z0-9_.-]+ = ', open(path, encoding="utf-8").read(), re.M))
+    except OSError:
+        return 0
 
 
 def inject_signature(vmsg: str) -> None:
@@ -681,7 +693,7 @@ def cmd_status() -> int:
     say("本包版本  ：%s（内容摘要 %s）" % (VERSION, package_digest()))
     cur = load_manifest(tgt)
     if not cur:
-        n = open(tgt.vmsg, encoding="utf-8").read().count(" = ") if os.path.exists(tgt.vmsg) else 0
+        n = count_entries(tgt.vmsg) if os.path.exists(tgt.vmsg) else 0
         say("已装版本  ：无清单（%s）" % ("检测到 %d 条消息目录，属旧版脚本安装" % n if n else "未安装"))
     else:
         say("已装版本  ：%s（%s）" % (cur.get("version", "?"), cur.get("installed_at", "?")))
@@ -702,7 +714,7 @@ def cmd_status() -> int:
         say("消息条数  ：%s" % cur.get("vmsg_entries", "?"))
         say("署名      ：%s" % (cur.get("signature") or "无"))
     if os.path.exists(tgt.vmsg):
-        say("实际消息  ：%d 条" % open(tgt.vmsg, encoding="utf-8").read().count(" = "))
+        say("实际消息  ：%d 条" % count_entries(tgt.vmsg))
     ack = os.path.join(tgt.res, "Acknowledgments.txt")
     if os.path.exists(ack):
         say("致谢页    ：%s" % ("已本地化" if "本产品包含开源软件" in read_text(ack) else "未本地化"))
