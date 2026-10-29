@@ -29,45 +29,38 @@ VMware Fusion 官方只提供 English / French / Japanese / Spanish 四种语言
 ## 安装
 
 ```bash
-sudo ./install.sh      # 需要管理员密码；会先自动退出 Fusion
-open -a "VMware Fusion"
-sudo ./uninstall.sh    # 回滚
+sudo python3 fzp.py install     # 需要管理员密码；会先自动退出 Fusion
+open -a "VMware Fusion"         # 消息目录在启动时加载，必须重新打开
+sudo python3 fzp.py uninstall   # 回滚到安装前
+python3 fzp.py status           # 查看当前安装状态
+python3 fzp.py verify           # 校验 .vmsg / .strings 格式（不需管理员权限）
+python3 fzp.py package          # 打包成 zip 便于分享
 ```
 
-`install.sh` 会：
+`install` 会：
 
-1. 备份被覆盖的文件到 `backup/<时间戳>/`
+1. 退出 Fusion，备份被覆盖的文件到 `backup/<时间戳>/`
 2. 写入 `zh-Hans/*.strings` 与增量补丁
-3. 写入 `messages/zh-Hans/vmware.vmsg`
-4. 从**本机已安装的** Fusion 读取英文 EULA 原文，与 `legal/eula_zh.txt` 合成中英对照版
-5. 用 `plutil -lint` 校验所有改动过的字符串表
-
+3. 写入 `v2/` 的附加表与 nib 补丁
+4. 写入 `messages/zh-Hans/vmware.vmsg`，并把署名注入「关于」窗口文案
+5. 从**本机已安装的** Fusion 读取英文 EULA，合成中英对照版；生成致谢页
+6. 用 `plutil -lint` 校验所有改动过的字符串表
 ## 目录结构
 
 ```
-install.sh / uninstall.sh   安装与回滚
-gen_patch.py                生成 .strings 补丁（v1）
-gen_patch_v2.py             生成 nib 补丁与附加表（v2）
-gen_vmsg.py                 合成 .vmsg（读取 translations_v*.py）
-translations_v4..v12.py     中文词条（按批次组织）
-vmsg/vmware.vmsg            生成物，安装时写入 app
-zh-Hans/  merge/  v2/       生成物
-legal/eula_zh.txt           协议中文译本（英文原文安装时从 app 读取，不入库）
-legal/build_legal.py        生成中英对照 EULA / Credits
-signature.txt               署名来源
+fzp.py                      唯一入口：install / uninstall / status / verify / package
+vmsg/vmware.vmsg            消息目录（译文的源，可直接编辑）
+zh-Hans/*.strings           整表补全（21 张）
+merge/*.append.strings      已有表的增量补丁（6 张）
+v2/                         nib 补丁与附加表
+legal/eula_zh.txt           协议中文译本（英文原文安装时从本机读取，不入库）
+legal/build_legal.py        生成中英对照 EULA / Credits / 致谢
+legal/apply_signature.py    署名注入（由 fzp.py 调用）
+signature.txt               署名来源（第一行即显示内容）
 tools/fusion-toolbar-fix.sh macOS 27 工具栏崩溃的规避开关
 docs/toolbar-crash.md       该崩溃的成因与规避说明
-NOTICE.md                   声明与共享说明
+legacy/                     早期拆分的构建脚本，仅作参考，可删
 ```
-
-## 维护
-
-```bash
-python3 gen_patch.py && python3 gen_patch_v2.py && python3 gen_vmsg.py
-```
-
-`.vmsg` 格式注意：换行写作 `|0A`，双引号写作 `|22`，百分号写作 `%%`，
-多参数使用 `%1$s %2$s` 编号占位符。缺键会自动回退到内置英文，可安全增量维护。
 
 ## 已知限制
 
