@@ -196,8 +196,12 @@ def preflight(tgt: App, force: bool = False, advisory: bool = False) -> bool:
             ok = False
 
     if host["arch"] != TESTED_ARCH:
-        say("  ⚠ 当前是 %s 主机，本项目只在 %s（Apple Silicon）上验证过；"
-            "Intel Mac 的 Fusion 结构相同，但请先备份并自行确认。" % (host["arch"], TESTED_ARCH))
+        say("  ✗ 当前主机架构为 %s，本项目**只在 arm64（Apple Silicon）上实测通过**。" % host["arch"])
+        say("    补丁本身只改语言资源、不碰代码，理论上与架构无关；但 Intel 环境未经验证，")
+        say("    且被修改的 nib 存在两种编译变体，Intel/旧系统加载的可能不是我改的那份。")
+        say("    确认要试请加 --force，并建议先 --dry-run 观察。")
+        if not force:
+            ok = False
     if "arm64" not in info["archs"] and host["arch"] == "arm64":
         say("  ✗ 该 Fusion 没有 arm64 切片，与 Apple Silicon 主机不匹配。")
         ok = False
