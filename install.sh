@@ -105,6 +105,7 @@ echo "==> v3：写入消息目录 messages/zh-Hans/vmware.vmsg"
 mkdir -p "$MSGDIR"
 cp "$HERE/vmsg/vmware.vmsg" "$MSGDIR/vmware.vmsg"
 echo "    $(grep -c ' = ' "$MSGDIR/vmware.vmsg") 条消息"
+python3 "$HERE/legal/apply_signature.py" "$MSGDIR/vmware.vmsg" "$HERE/signature.txt"
 if [ -d "$HERE/v2/duiSettingsViewBrowser.nib" ]; then
   rm -rf "$BASEDIR/duiSettingsViewBrowser.nib"
   cp -Rp "$HERE/v2/duiSettingsViewBrowser.nib" "$BASEDIR/"
