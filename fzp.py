@@ -37,7 +37,7 @@ import time
 import zipfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-VERSION = "1.3.0"
+VERSION = "1.4.0"
 DEFAULT_APP = "/Applications/VMware Fusion.app"
 SIG_FILE = os.path.join(HERE, "signature.txt")
 MANIFEST_NAME = ".fzp-manifest.json"
