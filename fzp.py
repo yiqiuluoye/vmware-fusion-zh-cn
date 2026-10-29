@@ -25,6 +25,7 @@ import json
 import os
 import re
 import shutil
+from shutil import SameFileError
 import subprocess
 import sys
 import tempfile
@@ -215,7 +216,13 @@ def preflight(tgt: App, force: bool = False, advisory: bool = False) -> bool:
         say("  ⚠ 当前 macOS %s 与验证环境（%s）不同，如遇异常请先卸载再反馈。" % (host["os"], TESTED_MACOS[1]))
 
     is_root = os.geteuid() == 0
-    if not is_root:
+    if not tgt.is_default:
+        # 测试/副本人群：不需要 root，能否写入交给下面的 writable() 判断
+        good, err = writable(tgt)
+        say("  写入权限       ：%s" % ("正常" if good else "不可写（%s）" % err))
+        if not good:
+            ok = False
+    elif not is_root:
         say("  %s 未以管理员身份运行；正式安装请用 sudo。"
             % ("·" if advisory else "✗"))
         if not advisory:
@@ -280,13 +287,20 @@ def source_files() -> list[str]:
     return out
 
 
-def earliest_original(basename: str) -> str | None:
-    """在历史备份里找该文件最早的副本——旧版安装留下的备份里通常是最原始的版本。"""
+def earliest_original(basename: str, exclude: str = "") -> str | None:
+    """在历史备份里找该文件最早的副本——旧版安装留下的备份里通常是最原始的版本。
+
+    必须排除本次新建的备份目录，否则会「自己拷自己」。
+    """
     root = os.path.join(HERE, "backup")
     if not os.path.isdir(root):
         return None
+    cur = os.path.abspath(exclude) if exclude else ""
     for b in sorted(os.listdir(root)):
-        p = os.path.join(root, b, basename)
+        d = os.path.abspath(os.path.join(root, b))
+        if cur and d == cur:
+            continue
+        p = os.path.join(d, basename)
         if os.path.isfile(p):
             return p
     return None
@@ -327,11 +341,15 @@ def deploy(tgt: App, bak: str, dry: bool = False, has_manifest: bool = False) ->
             if not dry:
                 src_bak = dst
                 if not has_manifest:
-                    old = earliest_original(os.path.basename(rel))
+                    old = earliest_original(os.path.basename(rel), exclude=bak)
                     if old:
                         src_bak = old
                         notes.append("从历史备份取回原始版本：%s" % os.path.basename(rel))
-                shutil.copy2(src_bak, bdst)
+                try:
+                    if os.path.realpath(src_bak) != os.path.realpath(bdst):
+                        shutil.copy2(src_bak, bdst)
+                except SameFileError:
+                    pass
         if not dry:
             os.makedirs(os.path.dirname(dst), exist_ok=True)
             data_writer(dst)
@@ -537,7 +555,7 @@ def cmd_install(argv: list[str]) -> int:
 
     stamp = time.strftime("%Y%m%d-%H%M%S")
     if tgt.is_default:
-        bak = os.path.join(HERE, "backup", "%s-%s" % (VERSION, stamp))
+        bak = os.path.join(HERE, "backup", "%s-v%s" % (stamp, VERSION))
     else:
         bak = tempfile.mkdtemp(prefix="fzp-backup-")
     os.makedirs(bak, exist_ok=True)
