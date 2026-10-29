@@ -716,39 +716,81 @@ def cmd_status() -> int:
     return 0
 
 
-def cmd_package() -> int:
-    out = os.path.join(os.path.dirname(HERE), "vmware-fusion-zh-cn-%s-v%s.zip"
-                       % (time.strftime("%Y%m%d"), VERSION))
-    skip = {"backup", "__pycache__", ".git", "legacy"}
+def cmd_package(argv: list[str] | None = None) -> int:
+    """打包发布件。
+
+    默认出「精简包」：只放运行所需 + 免费声明/许可，体积小、给终端用户。
+    加 --full 出「完整包」：整个仓库（含文档、截图、CI 配置），给开发者。
+    """
+    full = "--full" in (argv or [])
+    if full:
+        include = None            # 全收
+        skip_dirs = {"backup", "__pycache__", ".git", "legacy"}
+        suffix = "full"
+    else:
+        include = [
+            "fzp.py", "安装.command", "卸载.command",
+            "README.md", "NOTICE.md", "LICENSE", "LICENSE.zh-CN.md",
+            "signature.txt", "vmsg", "zh-Hans", "merge", "v2", "legal",
+        ]
+        skip_dirs = set()
+        suffix = "slim"
+
+    out = os.path.join(os.path.dirname(HERE),
+                       "vmware-fusion-zh-cn-%s-v%s-%s.zip" % (time.strftime("%Y%m%d"), VERSION, suffix))
+    if os.path.exists(out):
+        os.remove(out)
+    n = 0
     with zipfile.ZipFile(out, "w", zipfile.ZIP_DEFLATED) as z:
-        for root, dirs, files in os.walk(HERE):
-            dirs[:] = [d for d in dirs if d not in skip]
-            for f in files:
-                if f in (".DS_Store",) or f.startswith("."):
-                    continue
-                p = os.path.join(root, f)
-                z.write(p, os.path.relpath(p, os.path.dirname(HERE)))
-    say("已打包：%s（%.0f KB）" % (out, os.path.getsize(out) / 1024))
+        if include is None:
+            for root, dirs, files in os.walk(HERE):
+                dirs[:] = [d for d in dirs if d not in skip_dirs]
+                for f in files:
+                    if f == ".DS_Store" or f.startswith(".git"):
+                        continue
+                    p = os.path.join(root, f)
+                    z.write(p, os.path.relpath(p, os.path.dirname(HERE)))
+                    n += 1
+        else:
+            for item in include:
+                p = os.path.join(HERE, item)
+                if os.path.isfile(p):
+                    z.write(p, os.path.join("fusion-zh-patch", item)); n += 1
+                elif os.path.isdir(p):
+                    for root, dirs, files in os.walk(p):
+                        dirs[:] = [d for d in dirs if d not in ("__pycache__",)]
+                        for f in files:
+                            if f == ".DS_Store":
+                                continue
+                            fp = os.path.join(root, f)
+                            z.write(fp, os.path.join("fusion-zh-patch", os.path.relpath(fp, HERE)))
+                            n += 1
+    say("已打包（%s，%d 个文件）：%s（%.0f KB）"
+        % ("完整包" if full else "精简包", n, out, os.path.getsize(out) / 1024))
     return 0
 
 
 def cmd_doctor() -> int:
+    """环境体检：版本 / 架构 / 写入权限 / 使用步骤。"""
     tgt = App(DEFAULT_APP)
     say("VMware Fusion 简体中文补丁 · 环境体检")
     say("")
     preflight(tgt, force=True, advisory=True)
     say("")
     if os.geteuid() != 0:
-        say("提示：当前以普通用户运行，「写入权限」一项未检测；安装时请用 sudo。")
+        say("提示：当前以普通用户运行，「写入权限」一项未检测；正式安装请用 sudo ./fzp.py")
         say("")
     say(USAGE_HINT)
     return 0
 
 
 def cmd_prune(argv: list[str]) -> int:
-    """清理历史备份：保留最早一个（含最原始的版本）与最近 N 个。"""
+    """清理历史备份：保留最早一个（含最原始版本）与最近 N 个。"""
     o, _f, _p = parse_args(argv, ("--keep",))
-    keep_n = int(o.get("--keep", 3))
+    try:
+        keep_n = int(o.get("--keep", 3))
+    except ValueError:
+        keep_n = 3
     root = os.path.join(HERE, "backup")
     if not os.path.isdir(root):
         say("没有备份目录")
@@ -764,23 +806,12 @@ def cmd_prune(argv: list[str]) -> int:
             shutil.rmtree(os.path.join(root, d))
         except PermissionError:
             failed += 1
-    kept = [d for d in items if not os.path.exists(os.path.join(root, d)) or d in items]
-    left = sorted(os.listdir(root))
     say("已删除 %d 个旧备份" % (len(drop) - failed))
     if failed:
-        say("  %d 个删不掉（属主是 root）：请用 sudo python3 fzp.py prune --keep %d" % (failed, keep_n))
+        say("  %d 个删不掉（属主 root）：请用 sudo ./fzp.py prune --keep %d" % (failed, keep_n))
+    left = sorted(os.listdir(root))
     say("当前保留 %d 个：%s" % (len(left), ", ".join(left)))
     return 0
-
-
-def elevate(argv: list[str]) -> int | None:
-    """非 root 且有终端时，用 sudo 重新执行自己；返回 None 表示继续在当前进程执行。"""
-    if os.geteuid() == 0 or "--no-elevate" in argv or not sys.stdin.isatty():
-        return None
-    exe = sys.executable or "python3"
-    say("需要管理员权限修改 /Applications，正在申请（会让你输入登录密码）…")
-    os.execvp("sudo", ["sudo", exe, os.path.abspath(__file__)] + [a for a in argv if a != "--no-elevate"])
-    return 1  # execvp 失败才会到这里
 
 
 def main(argv: list[str]) -> int:
@@ -800,7 +831,7 @@ def main(argv: list[str]) -> int:
         "uninstall": cmd_uninstall,
         "status": lambda _a: cmd_status(),
         "verify": lambda _a: 0 if verify() else 1,
-        "package": lambda _a: cmd_package(),
+        "package": cmd_package,
         "prune": cmd_prune,
         "doctor": lambda _a: cmd_doctor(),
     }.get(cmd, lambda _a: (say("未知命令：%s\n" % cmd), print(__doc__), 1)[-1])(rest)

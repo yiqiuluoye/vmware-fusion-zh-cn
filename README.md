@@ -114,6 +114,10 @@ python3 fzp.py doctor     # 环境体检：版本、架构、写入权限一次�
 
 ## 安装
 
+Release 里的 `…-slim.zip` 是**精简包**：只含运行所需文件（`fzp.py`、`vmsg/`、`zh-Hans/`、
+`legal/` 等）加上 README、NOTICE（含免费声明）与许可证，约 136 KB。
+文档、截图、CI 配置、贡献指南只在仓库里，不随包分发。
+
 **三步：解压 → 双击 `安装.command` → 输入登录密码。**
 
 只用命令行也行：
