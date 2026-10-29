@@ -1,0 +1,24 @@
+/* 由 fusion-zh-patch 生成：VMware Fusion 26H1 简体中文补全 */
+
+"65.title" = "处理器";
+"85.title" = "内存";
+"94.ibExternalAccessibilityDescription" = "处理器选择";
+"96.title" = "OtherViews";
+"102.ibExternalAccessibilityDescription" = "以 MB 为单位的内存大小";
+"103.title" = "12345";
+"107.title" = "MB";
+"249.ibExternalAccessibilityDescription" = "推荐的内存大小";
+"250.title" = "99999 MB";
+"273.title" = "高级选项";
+"288.title" = "在此虚拟机中启用虚拟机监控程序应用程序";
+"302.title" = "通过在此虚拟机中提供对 Intel VT-x/EPT 的支持，允许运行现代虚拟化应用程序。";
+"305.title" = "通过在此虚拟机中提供对 CPU 性能监视计数器的支持，允许运行现代代码分析应用程序。";
+"306.title" = "在此虚拟机中启用代码分析应用程序";
+"335.title" = "（推荐）";
+"337.title" = "您的 Mac 上剩余 99999 MB";
+"342.title" = "99999 MB";
+"344.title" = "99999 GB";
+"0NR-5S-tUz.title" = "兼容性模式：";
+"JfU-pI-Pjc.title" = "限制可用的 CPU 功能后，可以在其他主机上恢复此虚拟机的快照或挂起状态。";
+"R1X-GH-2py.title" = "在此虚拟机中启用 IOMMU";
+"jia-HR-TsE.title" = "启用 CPU 兼容性";

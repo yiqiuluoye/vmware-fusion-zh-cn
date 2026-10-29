@@ -1,0 +1,13 @@
+/* 由 fusion-zh-patch 生成：VMware Fusion 26H1 简体中文补全 */
+
+"32.headerCell.title" = "名称";
+"68.title" = "从您的 Mac 连接 USB 设备：";
+"70.title" = "移除 USB 控制器";
+"84.title" = "高级 USB 选项";
+"139.title" = "添加 USB 控制器";
+"140.title" = "您的虚拟机当前没有 USB 控制器。请添加一个 USB 控制器，才能将 USB 设备连接到虚拟机。";
+"160.title" = "OtherViews";
+"161.title" = "USB 1.1";
+"162.title" = "USB 2.0";
+"163.title" = "USB 3.2";
+"165.title" = "USB 兼容性：";

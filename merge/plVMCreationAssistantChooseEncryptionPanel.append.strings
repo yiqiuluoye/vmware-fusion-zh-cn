@@ -1,0 +1,10 @@
+/* 由 fusion-zh-patch 生成：VMware Fusion 26H1 简体中文补全 */
+
+"x1w-bg-q7e.title" = "输入加密密码";
+"dOs-Sp-Lsf.title" = "仅加密支持虚拟 TPM 所需的文件（.nvram、.vmss、\\n.vmem、.vmx、.vmsn）。";
+"tfr-PW-P5H.title" = "此虚拟机的所有文件（.vmdk、.vmx 等）都将被加密。";
+"Sae-GR-xRJ.title" = "密码";
+"kse-Fz-bC3.title" = "验证";
+"kXw-J2-9H4.title" = "生成";
+"4051.title" = "密码不匹配";
+"WWf-6o-z21.title" = "在 macOS 钥匙串中记住密码";

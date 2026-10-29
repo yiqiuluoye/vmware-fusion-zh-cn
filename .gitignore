@@ -1,0 +1,8 @@
+backup/
+__pycache__/
+*.pyc
+remaining_keys.tsv
+.DS_Store
+# 厂商文本不入库：EULA 英文原文由安装脚本从本机 app 读取后生成
+legal/EULA.rtf
+*.old
