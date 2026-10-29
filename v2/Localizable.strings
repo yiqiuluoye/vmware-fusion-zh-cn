@@ -1,0 +1,25 @@
+/* fusion-zh-patch v2：默认表（Localizable） */
+
+"General" = "通用";
+"Keyboard & Mouse" = "键盘和鼠标";
+"Processors & Memory" = "处理器和内存";
+"Display" = "显示器";
+"Network Adapter" = "网络适配器";
+"Hard Disk (NVMe)" = "硬盘 (NVMe)";
+"CD/DVD (SATA)" = "CD/DVD (SATA)";
+"Sound Card" = "声卡";
+"USB" = "USB";
+"Camera" = "摄像头";
+"Trusted Platform Module" = "受信任的平台模块";
+"Startup Disk" = "启动磁盘";
+"Encryption" = "加密";
+"Compatibility" = "兼容性";
+"Isolation" = "隔离";
+"Advanced" = "高级";
+"System Settings" = "系统设置";
+"Removable Devices" = "可移除设备";
+"Other" = "其他";
+"Settings" = "设置";
+"%@: Settings" = "%@：设置";
+"Show All" = "显示全部";
+"Add Device..." = "添加设备…";

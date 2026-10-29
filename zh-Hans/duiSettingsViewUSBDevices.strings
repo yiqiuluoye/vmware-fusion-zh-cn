@@ -1,0 +1,30 @@
+/* 由 fusion-zh-patch 生成：VMware Fusion 26H1 简体中文补全 */
+
+"32.headerCell.title" = "名称";
+"55.headerCell.title" = "插入时操作";
+"68.title" = "连接 USB 设备：";
+"70.title" = "移除 USB 控制器";
+"72.title" = "OtherViews";
+"73.title" = "询问要执行的操作";
+"74.title" = "连接到 Windows";
+"75.title" = "连接到您的 Mac";
+"84.title" = "高级 USB 选项";
+"106.title" = "询问要执行的操作";
+"107.title" = "连接到此虚拟机";
+"108.title" = "连接到您的 Mac";
+"111.title" = "OtherViews";
+"116.title" = "虚拟机运行时，如果有新的 USB 设备插入您的 Mac，VMware Fusion 应该：";
+"119.title" = "连接到其他虚拟机";
+"139.title" = "添加 USB 控制器";
+"140.title" = "您的虚拟机当前没有 USB 控制器。请添加一个 USB 控制器，才能将 USB 设备连接到虚拟机。";
+"160.title" = "OtherViews";
+"161.title" = "USB 1.1";
+"162.title" = "USB 2.0";
+"163.title" = "USB 3.2";
+"165.title" = "USB 兼容性：";
+"201.title" = "OtherViews";
+"202.title" = "询问要执行的操作";
+"203.title" = "连接到 Mac";
+"204.title" = "连接到 Windows";
+"288.title" = "连接到其他虚拟机";
+"uxk-wq-VgC.title" = "重置所有已保存的操作";

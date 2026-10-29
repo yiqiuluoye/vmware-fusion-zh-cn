@@ -1,0 +1,23 @@
+/* 由 fusion-zh-patch 生成：VMware Fusion 26H1 简体中文补全 */
+
+"AboutWindowTitle" = "关于 %@";
+"AboutWindowVersion" = "版本 %@ (%@)";
+"AboutAcknowledgements" = "致谢";
+"AboutLicenseAgreement" = "许可协议";
+"TimeEstimateMultiHourEstimate" = "约 %u 小时";
+"TimeEstimateSingleHourEstimate" = "约 1 小时";
+"TimeEstimateMultiMinuteEstimate" = "约 %u 分钟";
+"TimeEstimateSingleMinuteEstimate" = "约 1 分钟";
+"TimeEstimateSubMinuteEstimate" = "不到一分钟";
+"AssistantCancel" = "取消";
+"AssistantContinue" = "继续";
+"AssistantGoBack" = "返回";
+"ResizeTrackingWidthLabel" = "宽：";
+"ResizeTrackingHeightLabel" = "高：";
+"ExportOVFValidationMsg" = "文件名不能以“.%1$@”结尾，必须以“.%2$@”结尾。";
+"ExportOVFValidationText" = "您可以同时使用两者，文件名将是“.%1$@.%2$@”。";
+"ExportOVFValidationFixButton" = "使用 .%@";
+"ExportOVFValidationCancel" = "取消";
+"ExportOVFValidationUseBoth" = "两者都用";
+"ExportOVFURLValidationMsg" = "导出文件名的长度不能超过 %d 个字符。";
+"ExportOVFURLValidationText" = "请使用更短的文件名重试。";

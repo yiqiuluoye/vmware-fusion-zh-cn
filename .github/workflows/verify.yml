@@ -1,0 +1,17 @@
+name: verify
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 校验 .vmsg 与 .strings 格式
+        run: python3 fzp.py verify
+      - name: 校验脚本可解析
+        run: python3 -c "import ast,sys;ast.parse(open('fzp.py',encoding='utf-8').read());print('fzp.py OK')"

@@ -1,0 +1,22 @@
+/* 由 fusion-zh-patch 生成：VMware Fusion 26H1 简体中文补全 */
+
+"227.ibShadowedToolTip" = "预分配的磁盘性能更好，但会始终占用全部磁盘空间。";
+"228.ibShadowedToolTip" = "拆分磁盘可以让您更轻松地把虚拟机移动到外部存储设备上。";
+"239.placeholderString" = "VMDK 最大大小";
+"239.title" = "GB";
+"244.title" = "OtherViews";
+"245.title" = "SCSI";
+"246.title" = "IDE";
+"247.title" = "总线类型：";
+"254.title" = "应用";
+"256.title" = "拆分为多个文件";
+"257.title" = "预分配磁盘空间";
+"258.title" = "还原";
+"262.title" = "高级选项";
+"279.title" = "OtherViews";
+"282.title" = "存储为…";
+"284.title" = "文件名：";
+"286.title" = "磁盘大小：";
+"294.title" = "移除硬盘";
+"360.title" = "SATA";
+"dYj-gw-W6R.title" = "NVMe";

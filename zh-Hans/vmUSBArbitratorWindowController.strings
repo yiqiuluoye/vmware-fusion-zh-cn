@@ -1,0 +1,19 @@
+/* 由 fusion-zh-patch 生成：VMware Fusion 26H1 简体中文补全 */
+
+"367.title" = "VMware Fusion";
+"456.title" = "请选择 %{value1}@ 的连接位置。";
+"468.title" = "记住我的选择，不再询问";
+"471.title" = "OtherViews";
+"472.title" = "连接到您的 Mac";
+"473.title" = "连接到虚拟机";
+"478.title" = "好";
+"518.ibShadowedDisplayPattern" = "请选择 %{value1}@ 的连接位置。";
+"520.title" = "VMware Fusion";
+"528.title" = "记住我的选择，不再询问";
+"533.title" = "连接到 Windows";
+"535.title" = "请选择 %{value1}@ 的连接位置。";
+"538.title" = "连接到 Mac";
+"549.ibShadowedDisplayPattern" = "请选择 %{value1}@ 的连接位置。";
+"571.title" = "Button";
+"574.title" = "Box";
+"577.title" = "Warning text *** DO NOT LOCALIZE ***";
