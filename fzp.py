@@ -602,9 +602,18 @@ def cmd_prune(argv: list[str]) -> int:
         say("备份数 %d，无需清理" % len(items))
         return 0
     drop = items[1:-keep_n] if keep_n else items[1:]
+    failed = 0
     for d in drop:
-        shutil.rmtree(os.path.join(root, d), ignore_errors=True)
-    say("已删除 %d 个旧备份，保留：%s" % (len(drop), ", ".join([items[0]] + items[-keep_n:])))
+        try:
+            shutil.rmtree(os.path.join(root, d))
+        except PermissionError:
+            failed += 1
+    kept = [d for d in items if not os.path.exists(os.path.join(root, d)) or d in items]
+    left = sorted(os.listdir(root))
+    say("已删除 %d 个旧备份" % (len(drop) - failed))
+    if failed:
+        say("  %d 个删不掉（属主是 root）：请用 sudo python3 fzp.py prune --keep %d" % (failed, keep_n))
+    say("当前保留 %d 个：%s" % (len(left), ", ".join(left)))
     return 0
 
 
