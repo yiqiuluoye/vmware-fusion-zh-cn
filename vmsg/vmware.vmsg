@@ -2713,3 +2713,4 @@ msg.vigor.vmx.reload.error = "重新加载配置文件“%1$s”时出错：%2$s
 msg.vigor.vmx.write.error = "无法写入 VMX 文件：%1$s。"
 msg.vigor.waitForShutdown = "操作成功。请延迟到 VMX 关闭后再完成。"
 msg.vigor.waitForShutdown.fail = "操作失败。请延迟到 VMX 关闭后再完成。"
+msg.uuid.altered = "此虚拟机可能已被移动或复制。|0A为了配置某些管理和网络功能，%1$s 需要知道此虚拟机是被移动了还是被复制了。|0A|0A如果不确定，请选择“%2$s”。|0A|0A"
